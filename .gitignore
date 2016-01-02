@@ -108,4 +108,5 @@ crashlytics-build.properties
 
 .DS_Store
 ._*
+*.pyc
 
