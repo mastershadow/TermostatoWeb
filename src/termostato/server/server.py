@@ -14,6 +14,7 @@ class Server(threading.Thread):
 
     def run(self):
         with self.sync:
+            cherrypy.config.update({"tools.sessions.on": True })
             cherrypy.server.socket_port = config.Port
             cherrypy.tree.mount(mysite.MySite(), "/", {
                  '/': {
