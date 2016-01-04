@@ -1,4 +1,4 @@
-var DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var HOURS = [];
 
 $(document).ready(function() {
@@ -57,7 +57,7 @@ var initScheduler = function() {
     s.append(ul);
     ul.append('<li class="header hour">&nbsp;</li>');
     for (var k in DAYS) {
-        ul.append('<li class="header day">' + DAYS[k] + "</li>");
+        ul.append('<li class="header dotw">' + DAYS[k] + "</li>");
     }
     for (var k in HOURS) {
         var hour = HOURS[k];
@@ -66,7 +66,20 @@ var initScheduler = function() {
         ul.append('<li class="header hour">' + hour + "</li>");
         for (var kk in DAYS) {
             var day = DAYS[kk];
-            ul.append('<li class="day" data-hour="' + hour + '" data-day="' + day + '">' + day + "</li>");
+            ul.append('<li class="item dotw night" data-hour="' + hour + '" data-day="' + day + '">&nbsp;</li>');
         }
     }
+
+    var schedulerItemAction = function(e) {
+        if (e.buttons == 1) {
+            var item = $(this);
+            // TODO get current status
+            // TODO set to new status if needed
+            item.toggleClass("night").toggleClass("day");
+        }
+    };
+    // mouse events
+    $("li.item", s).mouseenter(schedulerItemAction);
+    $("li.item", s).mousedown(schedulerItemAction);
+
 }

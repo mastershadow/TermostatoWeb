@@ -253,6 +253,15 @@ body.login .form-signin {
     border-radius: 0.5em;
 }
 
+#scheduler {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 #scheduler ul {
     overflow: hidden;
     padding: 0;
@@ -263,12 +272,27 @@ body.login .form-signin {
 
 #scheduler ul li {
     float: left;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
 }
 
 #scheduler ul li.header.hour {
     width: 32px;
 }
 
-#scheduler ul li.day {
+#scheduler ul li.header.dotw {
     width: 90px;
+    text-align: center;
+}
+
+#scheduler ul li.item {
+    width: 90px;
+}
+
+#scheduler ul li.night {
+    background-color: #337ab7;
+}
+
+#scheduler ul li.day {
+    background-color: #5cb85c;
 }
