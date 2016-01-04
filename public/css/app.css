@@ -129,7 +129,7 @@ ul.alert-dropdown {
         border: none;
         border-radius: 0;
         overflow-y: auto;
-        background-color: #222;
+        background-color: #333;
         bottom: 0;
         overflow-x: hidden;
         padding-bottom: 40px;
@@ -142,8 +142,14 @@ ul.alert-dropdown {
     .side-nav li a:hover,
     .side-nav li a:focus {
         outline: none;
-        background-color: #000 !important;
+        background-color: #222 !important;
     }
+}
+
+.navbar-inverse .navbar-nav>.active>a,
+.navbar-inverse .navbar-nav>.active>a:focus,
+.navbar-inverse .navbar-nav>.active>a:hover {
+        background-color: #222 !important;
 }
 
 .side-nav>li>ul {
@@ -253,7 +259,16 @@ body.login .form-signin {
     border-radius: 0.5em;
 }
 
+.page-header {
+    margin-top: 10px;
+}
+
+.navbar-inverse .navbar-brand {
+    color: #ff9900;
+}
+
 #scheduler {
+    width: 700px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -295,4 +310,8 @@ body.login .form-signin {
 
 #scheduler ul li.day {
     background-color: #5cb85c;
+}
+
+#scheduler ul li.week {
+    background-color: #d9edf7;
 }

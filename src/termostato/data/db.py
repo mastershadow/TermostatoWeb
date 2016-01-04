@@ -7,7 +7,7 @@ class Reading(Model):
     id = PrimaryKeyField()
     timestamp = DateTimeField()
     temperature = DoubleField()
-    status = BooleanField()
+    relay_status = BooleanField()
 
     class Meta:
         database = db
@@ -19,12 +19,13 @@ class Scheduling(Model):
     dotw = IntegerField()
     start_time = TimeField()
     end_time = TimeField()
+    status = IntegerField()  # 0 is Night, 1 is Day, 2 is Weekend
 
     class Meta:
         database = db
 
 
-class State(Model):
+class OperatingMode(Model):
     id = PrimaryKeyField()
     name = CharField()
 
@@ -36,7 +37,13 @@ class Setting(Model):
     id = PrimaryKeyField()
     day_temperature = DoubleField()
     night_temperature = DoubleField()
-    state = ForeignKeyField(State)
+    weekend_temperature = DoubleField()
+    manual_temperature = DoubleField()
+    operating_mode = ForeignKeyField(OperatingMode)
+    over_hysteresis = DoubleField()
+    below_hysteresis = DoubleField()
+    last_automatic_status = IntegerField()
+    current_relay_status = BooleanField()
 
     class Meta:
         database = db

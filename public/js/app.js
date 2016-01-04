@@ -1,5 +1,6 @@
 var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var HOURS = [];
+var SCHEDULING = [];
 
 $(document).ready(function() {
 
@@ -17,7 +18,6 @@ $(document).ready(function() {
     });
 
     initScheduler();
-    $($(".nav li.menu")[1]).click();
 
     new Morris.Area({
       element: 'morris-area-chart',
@@ -37,6 +37,10 @@ $(document).ready(function() {
       hideHover : 'auto',
       labels: ['Temperature']
     });
+
+    $("[name='relayStatus']").bootstrapSwitch();
+
+    $($(".nav li.menu")[1]).click();
 });
 
 function padLeft(nr, n, str){
@@ -52,6 +56,16 @@ var initScheduler = function() {
         }
     }
 
+    // TODO replace with something real
+    for (var k in DAYS) {
+        var curDay = [];
+        for (var kh in HOURS) {
+            curDay.push(0);
+        }
+        SCHEDULING[k] = curDay;
+    }
+    // END
+
     var s = $("#scheduler");
     var ul = $(document.createElement("ul"));
     s.append(ul);
@@ -59,27 +73,66 @@ var initScheduler = function() {
     for (var k in DAYS) {
         ul.append('<li class="header dotw">' + DAYS[k] + "</li>");
     }
-    for (var k in HOURS) {
-        var hour = HOURS[k];
+    for (var hourIdx in HOURS) {
+        var hour = HOURS[hourIdx];
         ul = $(document.createElement("ul"));
         s.append(ul);
         ul.append('<li class="header hour">' + hour + "</li>");
-        for (var kk in DAYS) {
-            var day = DAYS[kk];
-            ul.append('<li class="item dotw night" data-hour="' + hour + '" data-day="' + day + '">&nbsp;</li>');
+        for (var dayIdx in DAYS) {
+            var day = DAYS[dayIdx];
+            var status = SCHEDULING[dayIdx][hourIdx];
+            if (status == 0) {
+                status = "night";
+            } else if (status == 1) {
+                status = "day";
+            } else if (status == 2) {
+                status = "week";
+            }
+            ul.append('<li class="item dotw ' + status + '" data-hour="' + hourIdx + '" data-day="' + dayIdx + '">&nbsp;</li>');
         }
     }
 
-    var schedulerItemAction = function(e) {
+
+    var newItemStatus = null;
+    var schedulerItemDown = function(e) {
         if (e.buttons == 1) {
             var item = $(this);
-            // TODO get current status
-            // TODO set to new status if needed
-            item.toggleClass("night").toggleClass("day");
+            var hourIdx = item.attr("data-hour");
+            var dayIdx = item.attr("data-day");
+            // get current status
+            var status = SCHEDULING[dayIdx][hourIdx];
+            if (status == 0) {
+                newItemStatus = 1;
+                item.removeClass("night").removeClass("week").addClass("day");
+            } else if (status == 1) {
+                newItemStatus = 2;
+                item.removeClass("day").removeClass("night").addClass("week");
+            } else if (status == 2) {
+                newItemStatus = 0;
+                item.removeClass("day").removeClass("week").addClass("night");
+            }
+            SCHEDULING[dayIdx][hourIdx] = newItemStatus;
+        }
+    };
+    var schedulerItemEnter = function(e) {
+        if (e.buttons == 1 && newItemStatus != null) {
+            var item = $(this);
+            var hourIdx = item.attr("data-hour");
+            var dayIdx = item.attr("data-day");
+            if (newItemStatus == 1) {
+                item.removeClass("night").removeClass("week").addClass("day");
+            } else if (newItemStatus == 2) {
+                item.removeClass("day").removeClass("night").addClass("week");
+            } else if (newItemStatus == 0) {
+                item.removeClass("day").removeClass("week").addClass("night");
+            }
+            SCHEDULING[dayIdx][hourIdx] = newItemStatus;
         }
     };
     // mouse events
-    $("li.item", s).mouseenter(schedulerItemAction);
-    $("li.item", s).mousedown(schedulerItemAction);
-
+    $("li.item", s).mouseenter(schedulerItemEnter);
+    $("li.item", s).mousedown(schedulerItemDown);
+    $("body").mouseup(function() {
+        newItemStatus = null;
+    });
 }
