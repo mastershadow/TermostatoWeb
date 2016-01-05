@@ -1,3 +1,4 @@
+import net.api as api
 import config
 import threading
 import time
@@ -9,12 +10,15 @@ class Scheduler(threading.Thread):
         threading.Thread.__init__(self)
         self.stopEvent = threading.Event()
         self.interval = config.Interval
+        self.apiServer = api.Api()
 
     def run(self):
         while not self.stopEvent.is_set():
             self.pull()
             self.push()
-            time.sleep(self.interval)
+            for i in range(self.interval):
+                if not self.stopEvent.is_set():
+                    time.sleep(1)
 
     def stop(self):
         if self.isAlive():
@@ -22,7 +26,9 @@ class Scheduler(threading.Thread):
             self.join()
 
     def pull(self):
-        print "Pull"
+        temp = self.apiServer.get_temp()
+        relay = self.apiServer.get_relay()
+        print temp + " " + relay
 
     def push(self):
-        print "Push"
+        return ''

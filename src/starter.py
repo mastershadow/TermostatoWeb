@@ -15,7 +15,6 @@ if __name__ == '__main__':
     config.Port = cParser.getint("Termostato", "Port")
     config.Interval = cParser.getint("Termostato", "Interval")
     config.DeviceAddress = cParser.get("Termostato", "DeviceAddress")
-    config.DevicePort = cParser.getint("Termostato", "DevicePort")
 
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
