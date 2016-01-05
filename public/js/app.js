@@ -41,6 +41,7 @@ $(document).ready(function() {
     $("[name='relayStatus']").bootstrapSwitch();
 
     $($(".nav li.menu")[1]).click();
+    hideLoading();
 });
 
 function padLeft(nr, n, str){
@@ -135,4 +136,22 @@ var initScheduler = function() {
     $("body").mouseup(function() {
         newItemStatus = null;
     });
+    $(".save-scheduling").click(function() {
+        var data = JSON.stringify(SCHEDULING);
+        $.ajax({
+            url: "api/save_scheduling",
+            data : data,
+            type: "POST",
+            contentType: 'application/json',
+            processData: false,
+            dataType: 'json',
+            success: function(response) {
+                console.log(response);
+            }
+        });
+    });
+}
+
+var hideLoading = function() {
+    $("#loading").hide();
 }

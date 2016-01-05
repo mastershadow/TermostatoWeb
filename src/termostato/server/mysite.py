@@ -1,5 +1,6 @@
-import cherrypy
 from termostato.net import api
+import cherrypy
+import simplejson
 
 
 def is_logged():
@@ -57,8 +58,10 @@ class Api(object):
         return "scheduling"
 
     @cherrypy.expose
-    def save_scheduling(self, body):
+    @cherrypy.tools.json_in()
+    def save_scheduling(self):
         self.validate_auth()
+        body = cherrypy.request.json
         return "save scheduling"
 
     @cherrypy.expose

@@ -315,3 +315,18 @@ body.login .form-signin {
 #scheduler ul li.week {
     background-color: #d9edf7;
 }
+
+.save-scheduling {
+    margin-top: 2em;
+}
+
+#loading {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    left: 0;
+    height: 100%;
+    z-index: 2000;
+    padding: 1em 1em;
+    background-color: #999999;
+}
