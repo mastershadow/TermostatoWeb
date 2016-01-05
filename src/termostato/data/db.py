@@ -1,17 +1,20 @@
 from peewee import *
 
-db = SqliteDatabase('termostato.db')
+db = SqliteDatabase('../termostato.db')
+
+def create_tables():
+    db.connect()
+    db.create_tables([Reading, Scheduling, OperatingMode, Setting])
 
 
 class Reading(Model):
     id = PrimaryKeyField()
-    timestamp = DateTimeField()
+    reading_timestamp = DateTimeField()
     temperature = DoubleField()
     relay_status = BooleanField()
 
     class Meta:
         database = db
-        order_by = ('timestamp')
 
 
 class Scheduling(Model):
