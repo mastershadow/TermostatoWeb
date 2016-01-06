@@ -2,9 +2,37 @@ from peewee import *
 
 db = SqliteDatabase('../termostato.db')
 
+
 def create_tables():
     db.connect()
     db.create_tables([Reading, Scheduling, OperatingMode, Setting])
+
+
+def prepare_settings_if_needed():
+    db.connect()
+    try:
+        s = Setting.get()
+    except:
+        s = Setting()
+        s.day_temperature = 20.0
+        s.night_temperature = 16.0
+        s.weekend_temperature = 18.0
+        s.manual_temperature = 20.0
+        s.scheduled_temperature = 20.0
+        s.operating_mode = 0
+        s.over_hysteresis = 0.5
+        s.below_hysteresis = 0.5
+        s.last_automatic_status = 0
+        s.current_relay_status = False
+        s.save()
+
+    try:
+        OperatingMode.get()
+    except:
+        OperatingMode.create(id=0, name="Automatic")
+        OperatingMode.create(id=1, name="Manual")
+        OperatingMode.create(id=2, name="Manual with override")
+    db.close()
 
 
 class Reading(Model):
@@ -46,6 +74,7 @@ class Setting(Model):
     over_hysteresis = DoubleField()
     below_hysteresis = DoubleField()
     last_automatic_status = IntegerField()
+    scheduled_temperature = DoubleField()
     current_relay_status = BooleanField()
 
     class Meta:

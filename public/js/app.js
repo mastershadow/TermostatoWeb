@@ -17,7 +17,13 @@ $(document).ready(function() {
         return confirm("Are you sure?");
     });
 
-    initScheduler();
+    $.ajax({
+        url : "api/scheduling"
+    }).done(function(data) {
+        SCHEDULING = data;
+    }).then(function() {
+        initScheduler();
+    })
 
     new Morris.Area({
       element: 'morris-area-chart',
@@ -39,7 +45,6 @@ $(document).ready(function() {
     });
 
     $("[name='relayStatus']").bootstrapSwitch();
-
     $($(".nav li.menu")[1]).click();
     hideLoading();
 });
@@ -56,16 +61,6 @@ var initScheduler = function() {
             HOURS.push(hm);
         }
     }
-
-    // TODO replace with something real
-    for (var k in DAYS) {
-        var curDay = [];
-        for (var kh in HOURS) {
-            curDay.push(0);
-        }
-        SCHEDULING[k] = curDay;
-    }
-    // END
 
     var s = $("#scheduler");
     var ul = $(document.createElement("ul"));

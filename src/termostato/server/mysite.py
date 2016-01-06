@@ -3,7 +3,6 @@ from termostato.data import db
 import cherrypy
 import datetime
 
-
 def is_logged():
     if 'logged' in cherrypy.session:
         return True
@@ -44,19 +43,58 @@ class Api(object):
             raise cherrypy.HTTPError(401, 'Not authorized')
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def temperature_history(self):
         self.validate_auth()
-        return "history"
+        db.db.connect()
+        results = []
+        for r in db.Reading.select().order_by(-db.Reading.reading_timestamp).limit(250):
+            results.append({
+                'timestamp': r.reading_timestamp.isoformat(),
+                'temperature': r.temperature,
+                'status': r.relay_status
+            })
+        db.db.close()
+        return results
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def status(self):
         self.validate_auth()
-        return "status"
+        db.db.connect()
+        s = db.Setting.get()
+        r = db.Reading.select().order_by(-db.Reading.reading_timestamp).get()
+
+        results = dict()
+        results['current_temperature'] = r.temperature
+        results['relay_status'] = r.relay_status
+        results['operating_mode'] = s.operating_mode.id
+        results['night_temperature'] = s.night_temperature
+        results['day_temperature'] = s.day_temperature
+        results['weekend_temperature'] = s.weekend_temperature
+        results['manual_temperature'] = s.manual_temperature
+        results['scheduled_temperature'] = s.scheduled_temperature
+
+        db.db.close()
+        return results
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def scheduling(self):
         self.validate_auth()
-        return "scheduling"
+        db.db.connect()
+        scheduling = db.Scheduling.select().order_by(+db.Scheduling.dotw, +db.Scheduling.start_time)
+        results = []
+        # prepare days
+        for x in range(7):
+            results.append([])
+        for s in scheduling:
+            dotw = s.dotw - 1
+            if dotw < 0:
+                dotw = 6
+            results[dotw].append(s.status)
+        db.db.close()
+        return results
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -114,19 +152,19 @@ class Api(object):
         self.validate_auth()
         return "save_operatingmode"
 
-    @cherrypy.expose
-    def gettemp(self):
-        self.validate_auth()
-        return self.apiServer.get_temp()
-
-    @cherrypy.expose
-    def getrelay(self):
-        self.validate_auth()
-        return self.apiServer.get_relay()
-
-    @cherrypy.expose
-    def setrelay(self, status=None):
-        self.validate_auth()
-        if status is not None:
-            return self.apiServer.set_relay(int(status) == 1)
-        return ''
+    # @cherrypy.expose
+    # def gettemp(self):
+    #     self.validate_auth()
+    #     return self.apiServer.get_temp()
+    #
+    # @cherrypy.expose
+    # def getrelay(self):
+    #     self.validate_auth()
+    #     return self.apiServer.get_relay()
+    #
+    # @cherrypy.expose
+    # def setrelay(self, status=None):
+    #     self.validate_auth()
+    #     if status is not None:
+    #         return self.apiServer.set_relay(int(status) == 1)
+    #     return ''
