@@ -302,6 +302,7 @@ body.login .form-signin {
 
 #scheduler ul li.item {
     width: 90px;
+    cursor: pointer;
 }
 
 #scheduler ul li.night {

@@ -1,6 +1,8 @@
 var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var HOURS = [];
 var SCHEDULING = [];
+var STATUS = null;
+var HISTORY = null;
 
 $(document).ready(function() {
 
@@ -16,42 +18,72 @@ $(document).ready(function() {
     $("a.logout").click(function() {
         return confirm("Are you sure?");
     });
+    $("[name='relayStatus']").bootstrapSwitch();
+
 
     $.ajax({
         url : "api/scheduling"
-    }).done(function(data) {
-        SCHEDULING = data;
-    }).then(function() {
-        initScheduler();
     })
-
-    new Morris.Area({
-      element: 'morris-area-chart',
-      data: [
-        { time: '2016-01-03 10:00', value: 20.1 },
-        { time: '2016-01-03 10:15', value: 20.2 },
-        { time: '2016-01-03 10:30', value: 20.1 },
-        { time: '2016-01-03 10:45', value: 20.3 },
-        { time: '2016-01-03 11:00', value: 20.4 },
-        { time: '2016-01-03 11:15', value: 19.8 },
-        { time: '2016-01-03 11:30', value: 19.8 }
-      ],
-      xkey: 'time',
-      ykeys: ['value'],
-      ymax: 'auto 21',
-      ymin: '12',
-      hideHover : 'auto',
-      labels: ['Temperature']
-    });
-
-    $("[name='relayStatus']").bootstrapSwitch();
-    $($(".nav li.menu")[1]).click();
-    hideLoading();
+    .done(function(data) {
+        SCHEDULING = data;
+    })
+    .then(initSettings)
+    .then(updateStatus)
+    .then(updateHistory)
+    .then(initScheduler)
+    .then(hideLoading);
 });
 
 function padLeft(nr, n, str){
     return Array(n-String(nr).length+1).join(str||'0')+nr;
 }
+
+var updateStatus = function() {
+    return $.ajax({
+        url : "api/status"
+    }).done(function(data) {
+        STATUS = data;
+        $("div.currentTemperature span").text(STATUS.current_temperature);
+        $("div.desiredTemperature span").text(STATUS.scheduled_temperature);
+        $("div.relayStatus").text(STATUS.relay_status ? 'ON' : 'OFF');
+        $("#dayTemperatureSpinner").spinbox('value', STATUS.day_temperature);
+        $("#weekendTemperatureSpinner").spinbox('value', STATUS.weekend_temperature);
+        $("#nightTemperatureSpinner").spinbox('value', STATUS.night_temperature);
+        $("#manualTemperatureSpinner").spinbox('value', STATUS.manual_temperature);
+        $("#dayTemperatureSpinner").spinbox('value', STATUS.day_temperature);
+        $("[name='relayStatus']").bootstrapSwitch('state', STATUS.relay_status);
+        $("#operatingModeList").selectlist('selectByIndex', STATUS.operating_mode);
+    });
+}
+
+var updateHistory = function() {
+    return $.ajax({
+        url : "api/temperature_history"
+    }).done(function(data) {
+        HISTORY = data;
+
+        new Morris.Area({
+          element: 'morris-area-chart',
+          data: HISTORY,
+          xkey: 'timestamp',
+          ykeys: ['temperature'],
+          ymax: 'auto 25',
+          ymin: '12',
+          hideHover : 'auto',
+          labels: ['Temperature']
+        });
+    });
+}
+
+var initSettings = function() {
+    $(".spinbox").spinbox({
+        min : 12.0,
+        max : 25.0,
+        step : 0.5,
+        value: 16.0,
+        speed : 'slow'
+    });
+};
 
 var initScheduler = function() {
     // GENERATE HOURS
@@ -149,4 +181,5 @@ var initScheduler = function() {
 
 var hideLoading = function() {
     $("#loading").hide();
+    $($(".nav li.menu")[1]).click();
 }
