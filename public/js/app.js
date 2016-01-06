@@ -1,8 +1,8 @@
 var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var HOURS = [];
 var SCHEDULING = [];
-var STATUS = null;
-var HISTORY = null;
+var STATUS = {};
+var HISTORY = [];
 
 $(document).ready(function() {
 
@@ -31,6 +31,7 @@ $(document).ready(function() {
     .then(updateStatus)
     .then(updateHistory)
     .then(initScheduler)
+    .then(initDashboard)
     .then(hideLoading);
 });
 
@@ -61,6 +62,7 @@ var updateHistory = function() {
         url : "api/temperature_history"
     }).done(function(data) {
         HISTORY = data;
+        $("#morris-area-chart").empty();
 
         new Morris.Area({
           element: 'morris-area-chart',
@@ -77,11 +79,58 @@ var updateHistory = function() {
 
 var initSettings = function() {
     $(".spinbox").spinbox({
-        min : 12.0,
-        max : 25.0,
-        step : 0.5,
+        min: 12.0,
+        max: 25.0,
+        step: 0.5,
         value: 16.0,
-        speed : 'slow'
+        limitToStep: true,
+        speed: 'slow'
+    }).on('changed.fu.spinbox', function () {
+        var id = $(this).attr("id");
+        var value = $(this).spinbox("value");
+        var api = "api/";
+        if (id == "manualTemperatureSpinner") {
+            api += "save_manualtemp";
+            STATUS.manual_temperature = value;
+        } else if (id == "nightTemperatureSpinner") {
+            api += "save_nighttemp";
+            STATUS.night_temperature = value;
+        } else if (id == "weekendTemperatureSpinner") {
+            api += "save_weektemp";
+            STATUS.weekend_temperature = value;
+        } else if (id == "dayTemperatureSpinner") {
+            api += "save_daytemp";
+            STATUS.day_temperature = value;
+        }
+
+        $.ajax({
+            url: api,
+            data : { t : value }
+        });
+    });
+
+    $("#operatingModeList").on('changed.fu.selectlist', function () {
+        var item = $(this).selectlist("selectedItem");
+        $.ajax({
+            url: "api/save_operatingmode",
+            data: { mode: item.value }
+        }).done(function() {
+            updateStatus();
+        });
+        STATUS.operating_mode = item.value;
+    });
+
+    $('input[name="relayStatus"]').on('switchChange.bootstrapSwitch', function(event, state) {
+        if (STATUS != null && state != STATUS.relay_status) {
+            $.ajax({
+                url: "api/save_relaystatus",
+                data: { status: state }
+            }).done(function() {
+                STATUS.relay_status = state;
+                // set manual with override
+                $("#operatingModeList").selectlist('selectByIndex', 2).trigger("changed.fu.selectlist");
+            });
+        }
     });
 };
 
@@ -175,11 +224,19 @@ var initScheduler = function() {
             success: function(response) {
                 console.log(response);
             }
+        }).fail(function() {
+            alert("Error during saving");
         });
     });
-}
+};
+
+var initDashboard = function() {
+    $("a.reload").click(function() {
+        updateStatus().then(updateHistory);
+    });
+};
 
 var hideLoading = function() {
     $("#loading").hide();
-    $($(".nav li.menu")[1]).click();
-}
+    // $($(".nav li.menu")[1]).click();
+};

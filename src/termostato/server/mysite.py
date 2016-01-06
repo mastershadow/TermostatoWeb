@@ -152,6 +152,11 @@ class Api(object):
         self.validate_auth()
         return "save_operatingmode"
 
+    @cherrypy.expose
+    def save_relaystatus(self, status):
+        self.validate_auth()
+        return "save_relaystatus"
+
     # @cherrypy.expose
     # def gettemp(self):
     #     self.validate_auth()

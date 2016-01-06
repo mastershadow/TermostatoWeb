@@ -321,6 +321,10 @@ body.login .form-signin {
     margin-top: 2em;
 }
 
+a.reload {
+    border: none;
+}
+
 #loading {
     position: absolute;
     top: 0;
