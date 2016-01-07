@@ -52,7 +52,7 @@ var updateStatus = function() {
         $("#nightTemperatureSpinner").spinbox('value', STATUS.night_temperature);
         $("#manualTemperatureSpinner").spinbox('value', STATUS.manual_temperature);
         $("#dayTemperatureSpinner").spinbox('value', STATUS.day_temperature);
-        $("[name='relayStatus']").bootstrapSwitch('state', STATUS.relay_status);
+        $("[name='relayStatus']").bootstrapSwitch('state', STATUS.desired_relay_status);
         $("#operatingModeList").selectlist('selectByIndex', STATUS.operating_mode);
     });
 }
@@ -121,12 +121,12 @@ var initSettings = function() {
     });
 
     $('input[name="relayStatus"]').on('switchChange.bootstrapSwitch', function(event, state) {
-        if (STATUS != null && state != STATUS.relay_status) {
+        if (STATUS != null && state != STATUS.desired_relay_status) {
             $.ajax({
                 url: "api/save_relaystatus",
                 data: { status: state }
             }).done(function() {
-                STATUS.relay_status = state;
+                STATUS.desired_relay_status = state;
                 // set manual with override
                 $("#operatingModeList").selectlist('selectByIndex', 2).trigger("changed.fu.selectlist");
             });

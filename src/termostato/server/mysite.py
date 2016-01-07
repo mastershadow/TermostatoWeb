@@ -74,6 +74,7 @@ class Api(object):
         results['weekend_temperature'] = s.weekend_temperature
         results['manual_temperature'] = s.manual_temperature
         results['scheduled_temperature'] = s.scheduled_temperature
+        results['desired_relay_status'] = s.desired_relay_status
 
         db.db.close()
         return results
@@ -130,46 +131,63 @@ class Api(object):
     @cherrypy.expose
     def save_daytemp(self, t):
         self.validate_auth()
-        return "save_daytemp"
+        db.db.connect()
+        s = db.Setting.get()
+        s.day_temperature = t
+        s.save()
+        db.db.close()
+        return t
 
     @cherrypy.expose
     def save_weektemp(self, t):
         self.validate_auth()
-        return "save_weektemp"
+        db.db.connect()
+        s = db.Setting.get()
+        s.weekend_temperature = t
+        s.save()
+        db.db.close()
+        return t
 
     @cherrypy.expose
     def save_nighttemp(self, t):
         self.validate_auth()
-        return "save_nighttemp"
+        db.db.connect()
+        s = db.Setting.get()
+        s.night_temperature = t
+        s.save()
+        db.db.close()
+        return t
 
     @cherrypy.expose
     def save_manualtemp(self, t):
         self.validate_auth()
-        return "save_manualtemp"
+        db.db.connect()
+        s = db.Setting.get()
+        s.manual_temperature = t
+        s.save()
+        db.db.close()
+        return t
 
     @cherrypy.expose
     def save_operatingmode(self, mode):
         self.validate_auth()
-        return "save_operatingmode"
+        db.db.connect()
+        s = db.Setting.get()
+        s.operating_mode = mode
+        s.save()
+        db.db.close()
+        return mode
 
     @cherrypy.expose
     def save_relaystatus(self, status):
         self.validate_auth()
-        return "save_relaystatus"
-
-    # @cherrypy.expose
-    # def gettemp(self):
-    #     self.validate_auth()
-    #     return self.apiServer.get_temp()
-    #
-    # @cherrypy.expose
-    # def getrelay(self):
-    #     self.validate_auth()
-    #     return self.apiServer.get_relay()
-    #
-    # @cherrypy.expose
-    # def setrelay(self, status=None):
-    #     self.validate_auth()
-    #     if status is not None:
-    #         return self.apiServer.set_relay(int(status) == 1)
-    #     return ''
+        if status == "false":
+            status = False
+        else:
+            status = True
+        db.db.connect()
+        s = db.Setting.get()
+        s.desired_relay_status = status
+        s.save()
+        db.db.close()
+        return str(status)

@@ -24,6 +24,7 @@ def prepare_settings_if_needed():
         s.below_hysteresis = 0.5
         s.last_automatic_status = 0
         s.current_relay_status = False
+        s.desired_relay_status = False
         s.save()
 
     try:
@@ -76,6 +77,7 @@ class Setting(Model):
     last_automatic_status = IntegerField()
     scheduled_temperature = DoubleField()
     current_relay_status = BooleanField()
+    desired_relay_status = BooleanField()
 
     class Meta:
         database = db
