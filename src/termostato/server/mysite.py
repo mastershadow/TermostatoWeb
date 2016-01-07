@@ -91,8 +91,6 @@ class Api(object):
             results.append([])
         for s in scheduling:
             dotw = s.dotw - 1
-            if dotw < 0:
-                dotw = 6
             results[dotw].append(s.status)
         db.db.close()
         return results
@@ -106,7 +104,7 @@ class Api(object):
         db.db.connect()
         newscheduling_data = []
         for day_idx, scheduling in enumerate(body):
-            dotw = (day_idx + 1) % 7
+            dotw = day_idx + 1
             for hour_idx, status in enumerate(scheduling):
                 tmins = hour_idx * 30
                 hour = int(tmins / 60)
