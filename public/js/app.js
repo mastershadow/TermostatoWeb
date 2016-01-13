@@ -3,6 +3,7 @@ var HOURS = [];
 var SCHEDULING = [];
 var STATUS = {};
 var HISTORY = [];
+var OPERATING_MODE_LABELS = ['Automatic', 'Manual', 'Manual override'];
 
 $(document).ready(function() {
 
@@ -54,6 +55,7 @@ var updateStatus = function() {
         $("#dayTemperatureSpinner").spinbox('value', STATUS.day_temperature);
         $("[name='relayStatus']").bootstrapSwitch('state', STATUS.desired_relay_status);
         $("#operatingModeList").selectlist('selectByIndex', STATUS.operating_mode);
+        $(".operatingModeLabel").text(OPERATING_MODE_LABELS[STATUS.operating_mode]);
     });
 }
 

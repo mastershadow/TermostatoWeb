@@ -172,6 +172,8 @@ class Api(object):
         db.db.connect()
         s = db.Setting.get()
         s.operating_mode = mode
+        if mode == "0":
+            s.desired_relay_status = True
         s.save()
         db.db.close()
         return mode
