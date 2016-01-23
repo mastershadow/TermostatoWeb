@@ -2,6 +2,9 @@ from termostato.net import api
 from termostato.data import db
 import cherrypy
 import datetime
+import pytz
+from decimal import Decimal
+
 
 def is_logged():
     if 'logged' in cherrypy.session:
@@ -48,11 +51,21 @@ class Api(object):
         self.validate_auth()
         db.db.connect()
         results = []
-        for r in db.Reading.select().order_by(-db.Reading.reading_timestamp).limit(250):
+        db_results = db.Reading.raw("select "
+                                    "datetime((strftime('%s', reading_timestamp) / 600) * 600, 'unixepoch') interval, "
+                                    "avg(temperature) temperature from reading "
+                                    "group by interval "
+                                    "having reading_timestamp  >= datetime('now', '-1 day') "
+                                    "order by interval").execute()
+        # db_results = db.Reading.select().order_by(-db.Reading.reading_timestamp).limit(250)
+        utc = pytz.utc
+        tz = pytz.timezone("Europe/Rome")
+        fmt = "%Y-%m-%d %H:%M:%S"
+
+        for r in db_results:
             results.append({
-                'timestamp': r.reading_timestamp.isoformat(),
-                'temperature': r.temperature,
-                'status': r.relay_status
+                'timestamp': utc.localize(datetime.datetime.strptime(r.interval, fmt)).astimezone(tz).strftime(fmt),
+                'temperature': Decimal(r.temperature).quantize(Decimal(10) ** -1)
             })
         db.db.close()
         return results

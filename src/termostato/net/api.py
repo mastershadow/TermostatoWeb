@@ -1,14 +1,13 @@
 from termostato import config
-from StringIO import StringIO
-import pycurl
 import sys
+import telnetlib
 
 
 class Api(object):
     def __init__(self):
         self.address = config.DeviceAddress
 
-    def parseResponse(self, res):
+    def parse_response(self, res):
         if res is not None:
             tokens = res.split()
             if len(tokens) > 1:
@@ -16,35 +15,37 @@ class Api(object):
         return None
 
     def get_temp(self):
-        return self.parseResponse(self.get("gettemp"));
+        r = self.parse_response(self.get("GETTEMP"))
+        if r is None:
+            return 20.0
+        return r
 
     def get_relay(self):
-        r = self.parseResponse(self.get("getrelay"));
+        r = self.parse_response(self.get("GETRELAY"))
         if r is not None:
             return r.lower() == 'on'
-        return None
+        #return None
+        return False
 
     def set_relay(self, status):
         r = None
         if status is True:
-            r = self.get("setrelay/on");
+            r = self.get("SETRELAY ON")
         else:
-            r = self.get("setrelay/off")
-        r = self.parseResponse(r);
+            r = self.get("SETRELAY OFF")
+        r = self.parse_response(r)
         if r is not None:
             return r.lower() == 'on'
         return None
 
-    def get(self, path):
+    def get(self, command):
         try:
-            _buffer = StringIO()
-            c = pycurl.Curl()
-            c.setopt(c.URL, self.address + "/api/" + path)
-            c.setopt(c.FOLLOWLOCATION, True)
-            c.setopt(c.CONNECTTIMEOUT, 10)
-            c.setopt(c.WRITEDATA, _buffer)
-            c.perform()
-            return _buffer.getvalue()
+            timeout = 3
+            tn = telnetlib.Telnet(self.address, 23, timeout)
+            tn.write(command + "\n")
+            _buffer = tn.read_until("\n", timeout).rstrip()
+            tn.close()
+            return _buffer
         except:
             print "Unexpected error:", sys.exc_info()[0]
             return None

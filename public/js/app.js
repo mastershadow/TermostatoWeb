@@ -73,6 +73,7 @@ var updateHistory = function() {
           ykeys: ['temperature'],
           ymax: 'auto 25',
           ymin: '12',
+          pointSize : 0,
           hideHover : 'auto',
           labels: ['Temperature']
         });
@@ -137,7 +138,15 @@ var initSettings = function() {
 };
 
 var initScheduler = function() {
+    var curDate = new Date();
+    var nowDay = curDate.getDay() - 1;
+    if (nowDay < 0) {
+        nowDay = 6;
+    }
+    var nowHour = curDate.getHours() * 2 + (curDate.getMinutes() >= 30 ? 1 : 0);
+
     // GENERATE HOURS
+    HOURS = [];
     for (var h = 0; h < 24; h++) {
         for (var m = 0; m < 60; m += 30) {
             var hm = padLeft(h, 2) + ":" + padLeft(m, 2);
@@ -146,6 +155,7 @@ var initScheduler = function() {
     }
 
     var s = $("#scheduler");
+    s.empty();
     var ul = $(document.createElement("ul"));
     s.append(ul);
     ul.append('<li class="header hour">&nbsp;</li>');
@@ -167,6 +177,11 @@ var initScheduler = function() {
             } else if (status == 2) {
                 status = "week";
             }
+
+            if (dayIdx == nowDay && hourIdx == nowHour) {
+                status += " now";
+            }
+
             ul.append('<li class="item dotw ' + status + '" data-hour="' + hourIdx + '" data-day="' + dayIdx + '">&nbsp;</li>');
         }
     }
@@ -234,7 +249,7 @@ var initScheduler = function() {
 
 var initDashboard = function() {
     $("a.reload").click(function() {
-        updateStatus().then(updateHistory);
+        updateStatus().then(updateHistory).then(initScheduler);
     });
 };
 

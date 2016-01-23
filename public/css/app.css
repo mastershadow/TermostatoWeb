@@ -317,6 +317,10 @@ body.login .form-signin {
     background-color: #d9edf7;
 }
 
+#scheduler .now {
+    background-image: repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255,255,255,1) 4px, rgba(255,255,255,1) 8px)
+}
+
 .save-scheduling {
     margin-top: 2em;
 }
