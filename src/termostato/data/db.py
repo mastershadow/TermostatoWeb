@@ -1,7 +1,7 @@
 from peewee import *
+import logging
 
 db = SqliteDatabase('../termostato.db')
-
 
 def create_tables():
     db.connect()
@@ -9,10 +9,12 @@ def create_tables():
 
 
 def prepare_settings_if_needed():
+    logger = logging.getLogger(__name__)
     db.connect()
     try:
         s = Setting.get()
     except:
+        logger.info("Default is missing: writing default settings...")
         s = Setting()
         s.day_temperature = 20.0
         s.night_temperature = 16.0

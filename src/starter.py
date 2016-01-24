@@ -3,12 +3,16 @@ from termostato.data import db
 import signal
 import sys
 import ConfigParser
+import logging
+import logging.config
+
 
 def signal_handler(signal, frame):
     t.stop()
     sys.exit(0)
 
 if __name__ == '__main__':
+    logging.config.fileConfig('../logging.ini')
     # read config
     cParser = ConfigParser.ConfigParser()
     cParser.read("../termostato.ini")

@@ -4,12 +4,14 @@ import config
 import threading
 import time
 import datetime
-import pytz
+import logging
+
 
 class Scheduler(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
+        self.logger = logging.getLogger(__name__)
         self.stopEvent = threading.Event()
         self.interval = config.Interval
         self.apiServer = api.Api()
@@ -116,8 +118,8 @@ class Scheduler(threading.Thread):
         return
 
     def set_relay_with_conditions(self, desired_temperature, desired_status=True, over_h=0.0, below_h=0.0):
-        print "T:" + str(self.temperature) + " R:" + str(self.relay) + " " +\
-              str(desired_temperature) + " " + str(desired_status) + " " + str(over_h) + " " + str(below_h)
+        self.logger.debug("T:" + str(self.temperature) + " R:" + str(self.relay) + " " +
+                          str(desired_temperature) + " " + str(desired_status) + " " + str(over_h) + " " + str(below_h))
         if not desired_status:  # if should be off, switch it off
             next_status = False
         else:
@@ -126,25 +128,25 @@ class Scheduler(threading.Thread):
                 max_temp = desired_temperature + over_h
                 if self.temperature > max_temp:
                     # temperature is above T + tolerance. switch it off
-                    print "Above T+"
+                    self.logger.debug("Above T+")
                     next_status = False
                 else:
                     # temperature is below T + tolerance. keep it on
-                    print "Below T+"
+                    self.logger.debug("Below T+")
                     next_status = True
             else:
                 # relay is off
                 min_temp = desired_temperature - below_h
                 if self.temperature < min_temp:
                     # temperature is below T - tolerance. switch if on
-                    print "Below T-"
+                    self.logger.debug("Below T-")
                     next_status = True
                 else:
                     # temperature is above T - tolerance. keep it off
-                    print "Above T-"
+                    self.logger.debug("Above T-")
                     next_status = False
 
-        print "Next: " + str(next_status)
+        self.logger.debug("Next: " + str(next_status))
         if next_status != self.relay:
             self.apiServer.set_relay(next_status)
         return next_status

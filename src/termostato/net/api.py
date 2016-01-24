@@ -1,11 +1,13 @@
 from termostato import config
 import sys
 import telnetlib
+import logging
 
 
 class Api(object):
     def __init__(self):
         self.address = config.DeviceAddress
+        self.logger = logging.getLogger(__name__)
 
     def parse_response(self, res):
         if res is not None:
@@ -16,16 +18,13 @@ class Api(object):
 
     def get_temp(self):
         r = self.parse_response(self.get("GETTEMP"))
-        if r is None:
-            return 20.0
         return r
 
     def get_relay(self):
         r = self.parse_response(self.get("GETRELAY"))
         if r is not None:
             return r.lower() == 'on'
-        #return None
-        return False
+        return None
 
     def set_relay(self, status):
         r = None
@@ -44,8 +43,9 @@ class Api(object):
             tn = telnetlib.Telnet(self.address, 23, timeout)
             tn.write(command + "\n")
             _buffer = tn.read_until("\n", timeout).rstrip()
+            self.logger.debug("API: %s - %s", command, _buffer)
             tn.close()
             return _buffer
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            self.logger.error("Unexpected error: %s", sys.exc_info()[0])
             return None
