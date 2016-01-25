@@ -88,10 +88,12 @@ class Scheduler(threading.Thread):
 
         elif setting.operating_mode.id == 1:
             # manual with override
+            self.logger.debug("MODE: Manual with override")
 
             if setting.last_automatic_status != scheduling.status:
+                self.logger.debug("Back to automatic")
                 # return to automatic
-                setting.operating_mode = 0
+                setting.operating_mode = db.OperatingMode.get(db.OperatingMode.id == 0)
                 setting.save()
             else:
                 # still in manual mode
@@ -106,6 +108,7 @@ class Scheduler(threading.Thread):
 
         elif setting.operating_mode.id == 2:
             # manual
+            self.logger.debug("MODE: Manual")
             drs = self.set_relay_with_conditions(setting.manual_temperature,
                                                  setting.desired_relay_status,
                                                  setting.over_hysteresis,
@@ -125,25 +128,25 @@ class Scheduler(threading.Thread):
         else:
             if self.relay is True:
                 # relay is on
-                max_temp = desired_temperature + over_h
+                max_temp = float(desired_temperature + over_h)
                 if self.temperature > max_temp:
                     # temperature is above T + tolerance. switch it off
-                    self.logger.debug("Above T+")
+                    self.logger.debug("Relay on and Above T+. Off")
                     next_status = False
                 else:
                     # temperature is below T + tolerance. keep it on
-                    self.logger.debug("Below T+")
+                    self.logger.debug("Relay on and Below T+. On")
                     next_status = True
             else:
                 # relay is off
-                min_temp = desired_temperature - below_h
+                min_temp = float(desired_temperature - below_h)
                 if self.temperature < min_temp:
                     # temperature is below T - tolerance. switch if on
-                    self.logger.debug("Below T-")
+                    self.logger.debug("Relay off and Below T-. On")
                     next_status = True
                 else:
                     # temperature is above T - tolerance. keep it off
-                    self.logger.debug("Above T-")
+                    self.logger.debug("Relay off and Above T-. Off")
                     next_status = False
 
         self.logger.debug("Next: " + str(next_status))

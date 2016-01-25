@@ -184,7 +184,7 @@ class Api(object):
         self.validate_auth()
         db.db.connect()
         s = db.Setting.get()
-        s.operating_mode = mode
+        s.operating_mode = db.OperatingMode.get(db.OperatingMode.id == mode)
         if mode == "0":
             s.desired_relay_status = True
         s.save()

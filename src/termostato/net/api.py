@@ -17,7 +17,7 @@ class Api(object):
         return None
 
     def get_temp(self):
-        r = self.parse_response(self.get("GETTEMP"))
+        r = float(self.parse_response(self.get("GETTEMP")))
         return r
 
     def get_relay(self):
@@ -45,6 +45,8 @@ class Api(object):
             _buffer = tn.read_until("\n", timeout).rstrip()
             self.logger.debug("API: %s - %s", command, _buffer)
             tn.close()
+            if _buffer == '+WHAT?':
+                _buffer = None
             return _buffer
         except:
             self.logger.error("Unexpected error: %s", sys.exc_info()[0])

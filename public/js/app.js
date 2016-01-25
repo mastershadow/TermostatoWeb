@@ -27,6 +27,12 @@ $(document).ready(function() {
     })
     .done(function(data) {
         SCHEDULING = data;
+
+        var resizeId;
+        $(window).resize(function() {
+            clearTimeout(resizeId);
+            resizeId = setTimeout(doneResizing, 100);
+        });
     })
     .then(initSettings)
     .then(updateStatus)
@@ -35,6 +41,10 @@ $(document).ready(function() {
     .then(initDashboard)
     .then(hideLoading);
 });
+
+function doneResizing() {
+    updateHistory();
+}
 
 function padLeft(nr, n, str){
     return Array(n-String(nr).length+1).join(str||'0')+nr;
@@ -229,6 +239,7 @@ var initScheduler = function() {
     $("body").mouseup(function() {
         newItemStatus = null;
     });
+    $(".save-scheduling").off("click");
     $(".save-scheduling").click(function() {
         var data = JSON.stringify(SCHEDULING);
         $.ajax({
