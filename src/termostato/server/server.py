@@ -16,6 +16,7 @@ class Server(threading.Thread):
         with self.sync:
             cherrypy.config.update({"tools.sessions.on": True })
             cherrypy.server.socket_port = config.Port
+            cherrypy.server.socket_host = '0.0.0.0'
 
             main_controller = mysite.MySite()
             api_controller = mysite.Api()
